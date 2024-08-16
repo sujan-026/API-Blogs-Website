@@ -1,5 +1,6 @@
 import express from 'express';
 import loggerMiddleWare from './middleware/logger.js';
+import pool from './db.js';
 const app = express();
 const PORT = 3000;
 
@@ -39,61 +40,73 @@ app.get('/', (req,res) =>{
     res.render('index.ejs');
 });
 
-app.get('/api/posts', (req, res) =>{
-    res.json(posts);
-});
-
-app.get('/api/posts/:id', (req, res) =>{
-    const post = posts.find((e) => e.id === parseInt(req.params.id));
-    if(!post){
-        res.status(404).json({ error: "Post id not found" });
-    } else{
-        res.json(post);
+// GET all posts
+app.get('/api/posts', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM posts');
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ error: 'Database query failed' });
     }
 });
 
-app.post('/api/posts/', (req, res) =>{
-    const newPost = {
-        id: posts.length ? Math.max(posts.map(p => p.id)) + 1 : 1,
-        name : req.body.name,
-        date: req.body.date,
-        content: req.body.content,
-        status: 'published'
-    }
-
-    if(!newPost.name || !newPost.content){
-        res.status(400).json({ error: "Required name and content"});
-    } else{
-        posts.push(newPost);
-        res.json(newPost);
-    }
-});
-
-app.put('/api/posts/:id', (req, res) =>{
-    const post = posts.find((e) => e.id === parseInt(req.params.id));
-
-    if(!post){
-        return res.status(404).json({ error: "Post not found" });
-    }
-
-    const upDatedPost = req.body;
-    posts.forEach((post) =>{
-        if(post.id === parseInt(req.params.id)){
-            post.name = upDatedPost.name ? upDatedPost.name : post.name;
-            post.content = upDatedPost.content ? upDatedPost.content : post.content;
-            
-            return res.status(200).json({'Updated post: ': post});
+// GET a single post by ID
+app.get('/api/posts/:id', async (req, res) =>{
+    const id = parseInt(req.params.id);
+    console.log(typeof(id));
+    try {
+        const rows = await pool.query('SELECT * FROM posts WHERE id = ?', [id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Post not found' });
         }
-    });
+        res.json(rows[0]);
+    } catch (error) {
+        res.status(500).json({ error: 'Error retrieving post' });
+    }
 });
 
-app.delete('/api/posts/:id', (req, res) => {
-    const postId = posts.findIndex((e) => e.id === parseInt(req.params.id));
-    if(postId === -1 || postId === undefined) return res.status(404).json({Error: "Post id is not found"});
-    else{
-        const deletedPost = posts[postId];
-        delete posts[postId];
-        return res.status(200).json({'Deleted post: ': deletedPost});
+app.post('/api/posts/', async (req, res) =>{
+    const { name, content } = req.body;
+    if (!name || !content) {
+        return res.status(400).json({ error: 'Required name and content' });
+    }
+
+    try {
+        const [result] = await pool.query('INSERT INTO posts (name, content, status) VALUES (?, ?, ?)', [name, content, 'published']);
+        const newPost = { id: result.insertId, name, content, status: 'published' };
+        res.status(201).json(newPost);
+    } catch (error) {
+        res.status(500).json({ error: 'Error creating post' });
+    }
+});
+
+app.put('/api/posts/:id', async (req, res) =>{
+    const { id } = req.params;
+    const { name, content } = req.body;
+
+    try {
+        const [result] = await pool.query('UPDATE posts SET name = ?, content = ?, date = NOW() WHERE id = ?', [name, content, id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+        const [updatedPost] = await pool.query('SELECT * FROM posts WHERE id = ?', [id]);
+        res.json(updatedPost[0]);
+    } catch (error) {
+        res.status(500).json({ error: 'Error updating post' });
+    }
+});
+
+app.delete('/api/posts/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const [result] = await pool.query('DELETE FROM posts WHERE id = ?', [id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+        res.status(200).json({ message: 'Post deleted' });
+    } catch (error) {
+        res.status(500).json({ error: 'Error deleting post' });
     }
 });
 

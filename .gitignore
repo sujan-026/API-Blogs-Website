@@ -1,6 +1,9 @@
 # Personal files
 idea.txt
 
+# database connections 
+db.js
+
 # Logs
 logs
 *.log
