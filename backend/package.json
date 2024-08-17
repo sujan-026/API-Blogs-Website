@@ -1,0 +1,32 @@
+{
+  "name": "blog-website",
+  "version": "1.0.0",
+  "description": "Blogs website with apis for handling data",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "nodemon index.js",
+    "dev": "nodemon /backend/index.js",
+    "build:css": "npx tailwindcss -i ./public/styles/styles.css -o ./public/styles/output.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sujan-026/API-Blogs-Website.git"
+  },
+  "author": "Sujan P",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sujan-026/API-Blogs-Website/issues"
+  },
+  "homepage": "https://github.com/sujan-026/API-Blogs-Website#readme",
+  "dependencies": {
+    "autoprefixer": "^10.4.20",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "mysql2": "^3.11.0",
+    "postcss": "^8.4.41",
+    "tailwindcss": "^3.4.10"
+  }
+}
