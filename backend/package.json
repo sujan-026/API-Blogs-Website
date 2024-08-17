@@ -6,8 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "node index.js",
-    "dev": "nodemon index.js",
-    "build:css": "npx tailwindcss -i ./public/styles/styles.css -o ./public/styles/output.css --watch"
+    "dev": "nodemon index.js"
   },
   "repository": {
     "type": "git",
@@ -20,6 +19,7 @@
   },
   "homepage": "https://github.com/sujan-026/API-Blogs-Website#readme",
   "dependencies": {
+    "@supabase/supabase-js": "^2.45.1",
     "autoprefixer": "^10.4.20",
     "body-parser": "^1.20.2",
     "dotenv": "^16.4.5",
