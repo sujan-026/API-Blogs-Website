@@ -5,9 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "nodemon index.js",
-    "dev": "nodemon index.js",
-    "build:css": "npx tailwindcss -i ./public/styles/styles.css -o ./public/styles/output.css --watch"
+    "test": "node index.js",
+    "dev": "nodemon index.js"
   },
   "repository": {
     "type": "git",
